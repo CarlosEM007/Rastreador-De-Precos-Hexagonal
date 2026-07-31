@@ -1,0 +1,6 @@
+@Bootstrap_HostAddress = http://localhost:5250
+
+GET {{Bootstrap_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
