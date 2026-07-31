@@ -1,4 +1,4 @@
-# Price Tracker
+# Rastreador de preços
  
 Esse projeto nasceu como um jeito de colocar em prática alguns conceitos que estou estudando na pós-graduação: **Arquitetura Hexagonal**, **Microsserviços** (com RabbitMQ), **Docker** e **API Gateway**. A ideia central é simples — um sistema que rastreia o preço de produtos e avisa quando ele cai — mas o objetivo real é usar esse sistema como campo de treino pra essas arquiteturas.
  
