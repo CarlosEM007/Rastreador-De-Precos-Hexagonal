@@ -1,20 +1,28 @@
+using Adapters.Notification;
+using Adapters.Persistence;
 using Adapters.Rest;
+using Adapters.Scraping;
 using Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Criar ExceptionHandler
 ErrorHandlingDependency.AddExceptionHandling(builder.Services);
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Injeção de Dependência
 ApplicationModuleDependency.AddApplicationModule(builder.Services);
+AdaptersPersistenceDependency.AddAdaptersPersistence(builder.Services);
+AdaptersRestDependency.AddAdaptersRest(builder.Services);
+AdapterGatewayDependency.AddAdapterGateway(builder.Services);
+AdaptersNotificationDependency.AddAdaptersNotification(builder.Services);
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -8,9 +8,6 @@ namespace Domain.Exceptions
 {
     public class InvalidProductURLException : Exception
     {
-        public InvalidProductURLException(string message)
-        {
-            throw new Exception($"URL Inválida: {message}");
-        }
+        public InvalidProductURLException(string message): base(message) { }
     }
 }

@@ -11,8 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Adapters.Notification\Adapters.Notification.csproj" />
     <ProjectReference Include="..\Adapters.Persistence\Adapters.Persistence.csproj" />
     <ProjectReference Include="..\Adapters.Rest\Adapters.Rest.csproj" />
+    <ProjectReference Include="..\Adapters.Scraper\Adapters.Scraping.csproj" />
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 

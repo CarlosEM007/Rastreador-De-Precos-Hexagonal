@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Ports.Driving
+namespace Application.Ports.Driven
 {
     public interface IProductRepository
     {
-        void SalvarProduto(Produto produto);
-        Produto BuscarProduct(long id);
+        Task SalvarProduto(Produto produto);
+        Task<Produto> BuscarProduto(long id);
     }
 }

@@ -11,6 +11,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Adapters.Persistence\Adapters.Persistence.csproj" />
 	  <ProjectReference Include="..\Application\Application.csproj" />
 	</ItemGroup>
 

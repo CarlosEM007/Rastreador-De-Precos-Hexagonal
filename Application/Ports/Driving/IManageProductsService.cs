@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Ports.Driven
+namespace Application.Ports.Driving
 {
     public interface IManageProductsService
     {
-        void RegistrarProduto(ProductDto product);
+        Task RegistrarProduto(ProductDto product);
+        Task ConsultarPrecoProduto(long id);
     }
 }

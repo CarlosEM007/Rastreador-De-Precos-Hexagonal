@@ -6,15 +6,17 @@ namespace Domain.Entities
     {
         public long Id { get; set; }
 
-        public string Nome { get; set; }
-        public string EnderecoProduto { get; set; }
+        public string? Nome { get; set; }
+        public string? EnderecoProduto { get; set; }
 
         public decimal PrecoAtual { get; set; }
         public decimal PrecoAlvo { get; set; }
 
+        public Produto() { }
+
         public Produto(string nome, string enderecoProduto, decimal precoAtual, decimal precoAlvo)
         {
-            if (enderecoProduto == null)
+            if (string.IsNullOrEmpty(enderecoProduto))
             {
                 throw new InvalidProductURLException("Não pode ser vázia.");
             }
@@ -30,13 +32,13 @@ namespace Domain.Entities
             PrecoAlvo = precoAlvo;
         }
 
-        public bool AtingiuPrecoAlvo(decimal precoAtual, decimal precoAlvo, out string Mensagem)
+        public bool AtingiuPrecoAlvo(decimal precoRecebidoDoScraper, out string Mensagem)
         {
             Mensagem = "";
 
-            if(PrecoAtual <= precoAlvo)
+            if(precoRecebidoDoScraper <= this.PrecoAlvo)
             {
-                Mensagem = $"O produto {this.Nome} atingiu o valor {precoAtual}";
+                Mensagem = $"O produto {this.Nome} atingiu o valor {precoRecebidoDoScraper}";
                 return true;
             }
 

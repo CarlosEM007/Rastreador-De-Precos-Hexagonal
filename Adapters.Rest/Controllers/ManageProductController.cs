@@ -1,5 +1,5 @@
 ﻿using Application.Dto;
-using Application.Ports.Driven;
+using Application.Ports.Driving;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Adapters.Rest.Controllers
@@ -18,7 +18,16 @@ namespace Adapters.Rest.Controllers
         [HttpPost]
         public async Task<IActionResult> RegisterProduct(ProductDto product)
         {
-            _service.RegistrarProduto(product);
+            await _service.RegistrarProduto(product);
+
+            return Ok();
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ConsultarPrecoProduto(long id)
+        {
+            await _service.ConsultarPrecoProduto(id);
 
             return Ok();
         }

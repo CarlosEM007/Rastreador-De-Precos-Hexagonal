@@ -1,6 +1,8 @@
 ﻿using Adapters.Persistence.Data;
-using Application.Ports.Driving;
+using Application.Ports.Driven;
 using Domain.Entities;
+using Domain.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Adapters.Persistence.Repository
 {
@@ -13,14 +15,23 @@ namespace Adapters.Persistence.Repository
             _context = context;
         }
 
-        public Produto BuscarProduct(long id)
+        public async Task<Produto> BuscarProduto(long id)
         {
-            throw new NotImplementedException();
+            Produto? produto = await _context.Produtos.Where(p => p.Id == id).FirstOrDefaultAsync();
+
+            if(produto == null)
+            {
+                throw new ProductNotFoundException("Produto não encontrado.");
+            }
+
+            return produto;
         }
 
-        public void SalvarProduto(Produto produto)
+        public async Task SalvarProduto(Produto produto)
         {
-            throw new NotImplementedException();
+            await _context.Produtos.AddAsync(produto);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

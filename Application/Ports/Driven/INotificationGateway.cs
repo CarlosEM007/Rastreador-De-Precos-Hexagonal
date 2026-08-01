@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Ports.Driving
+namespace Application.Ports.Driven
 {
-    public interface IScraperAdapter
+    public interface INotificationGateway
     {
-        void SendProduct(string productUrl);
+        Task NotificarPrecoAlvoAtingido(string Message);
     }
 }

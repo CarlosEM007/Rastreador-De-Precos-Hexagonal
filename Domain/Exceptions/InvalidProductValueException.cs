@@ -8,9 +8,6 @@ namespace Domain.Exceptions
 {
     public class InvalidProductValueException : Exception
     {
-        public InvalidProductValueException(string message)
-        {
-            throw new Exception($"Valor inválido: {message}");
-        }
+        public InvalidProductValueException(string message) : base(message) { }
     }
 }
