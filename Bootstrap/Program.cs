@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 
 // Injeção de Dependência
 ApplicationModuleDependency.AddApplicationModule(builder.Services);
-AdaptersPersistenceDependency.AddAdaptersPersistence(builder.Services);
+AdaptersPersistenceDependency.AddAdaptersPersistence(builder.Services, builder.Configuration);
 AdaptersRestDependency.AddAdaptersRest(builder.Services);
 AdapterGatewayDependency.AddAdapterGateway(builder.Services);
 AdaptersNotificationDependency.AddAdaptersNotification(builder.Services);
