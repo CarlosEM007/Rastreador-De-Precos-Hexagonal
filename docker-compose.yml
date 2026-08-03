@@ -1,12 +1,12 @@
 services:
   postgres:
-    image: postgres
+    image: postgres:18
     volumes: 
         - postgres_data:/var/lib/postgresql
     environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: "123321"
-        POSTGRES_DB: rastreador_db  
+        POSTGRES_USER: ${POSTGRESUSER}
+        POSTGRES_PASSWORD: ${POSTGRESPASSWORD}
+        POSTGRES_DB: ${POSTGRESDB}  
     ports:
         - "5432:5432"
   rabbitmq:
@@ -17,8 +17,8 @@ services:
       - 5672:5672
       - 15672:15672
     environment:
-      RABBITMQ_DEFAULT_USER: carlos
-      RABBITMQ_DEFAULT_PASS: carlos
+      RABBITMQ_DEFAULT_USER: ${RABBITMQDEFAULTUSER} 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQDEFAULTPASS} 
     configs:
       - source: rabbitmq-plugins
         target: /etc/rabbitmq/enabled_plugins

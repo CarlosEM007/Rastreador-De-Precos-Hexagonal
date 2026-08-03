@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 Bootstrap/appsettings.json
 Bootstrap/appsettings.Development.json
+
+.env
