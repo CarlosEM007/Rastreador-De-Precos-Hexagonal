@@ -1,4 +1,5 @@
 ﻿using Application.Ports.Driven;
+using System.IO;
 
 namespace Adapters.Notification.Notificator
 {
@@ -6,11 +7,13 @@ namespace Adapters.Notification.Notificator
     {
         public async Task NotificarPrecoAlvoAtingido(string Message)
         {
-            string caminho = $@"C:\RastreadorDePrecos";
+            string caminhobase = Path.GetTempPath();
+
+            string caminho = Path.Combine(caminhobase, "RastreadorDePrecos");
 
             Directory.CreateDirectory(caminho);
 
-            using (StreamWriter writer = new StreamWriter($@"{caminho}\RegistroDePreco({DateTime.Now.ToString("dd.MM.yy")}).txt"))
+            using (StreamWriter writer = new StreamWriter(Path.Combine(caminho, $"RegistroDePreco({DateTime.Now:dd.MM.yy}).txt")))
             {
                 await writer.WriteLineAsync(Message);
             }

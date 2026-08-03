@@ -10,7 +10,7 @@ services:
     ports:
         - "5432:5432"
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:4
     container_name: rabbitmq
     restart: always
     ports:
@@ -25,6 +25,20 @@ services:
     volumes:
       - rabbitmq-lib:/var/lib/rabbitmq/
       - rabbitmq-log:/var/log/rabbitmq
+  rastreador:
+    build:
+      context: .
+      dockerfile: Bootstrap/Dockerfile
+    container_name: rastreador-app
+    ports:
+    - 5250:8080
+    depends_on:
+    - "postgres"
+    - "rabbitmq"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=${POSTGRESDB};Username=${POSTGRESUSER};Password=${POSTGRESPASSWORD};
+   
 
 configs:
   rabbitmq-plugins:

@@ -366,3 +366,4 @@ Bootstrap/appsettings.json
 Bootstrap/appsettings.Development.json
 
 .env
+.dockerignore
