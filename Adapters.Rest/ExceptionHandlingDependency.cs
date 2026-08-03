@@ -1,7 +1,4 @@
 ﻿using Adapters.Rest.Exception;
-using Application.Ports.Driven;
-using Application.UseCases;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Adapters.Rest
@@ -10,6 +7,7 @@ namespace Adapters.Rest
     {
         public static void AddExceptionHandling(this IServiceCollection services)
         {
+            services.AddProblemDetails();
             services.AddExceptionHandler<ErrorHandlingMiddleware>();
         }
     }
