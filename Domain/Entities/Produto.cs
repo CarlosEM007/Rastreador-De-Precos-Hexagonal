@@ -38,7 +38,7 @@ namespace Domain.Entities
 
             if(precoRecebidoDoScraper <= this.PrecoAlvo)
             {
-                Mensagem = $"O produto {this.Nome} atingiu o valor {precoRecebidoDoScraper}";
+                Mensagem = $"O produto {this.Nome} atingiu o preço de R${precoRecebidoDoScraper}";
                 return true;
             }
 

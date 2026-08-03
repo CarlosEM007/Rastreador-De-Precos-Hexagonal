@@ -10,7 +10,7 @@ namespace Adapters.Notification.Notificator
 
             Directory.CreateDirectory(caminho);
 
-            using (StreamWriter writer = new StreamWriter($@"{caminho}\RegistroDePreco({DateTime.Now.ToString("dd.MM.yy")}\n"))
+            using (StreamWriter writer = new StreamWriter($@"{caminho}\RegistroDePreco({DateTime.Now.ToString("dd.MM.yy")}).txt"))
             {
                 await writer.WriteLineAsync(Message);
             }
