@@ -1,3 +1,4 @@
+using Adapters.Messaging;
 using Adapters.Notification;
 using Adapters.Persistence;
 using Adapters.Rest;
@@ -14,10 +15,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Injeção de Dependência
+AdaptersRestDependency.AddAdaptersRest(builder.Services);
 ApplicationModuleDependency.AddApplicationModule(builder.Services);
 AdaptersPersistenceDependency.AddAdaptersPersistence(builder.Services, builder.Configuration);
-AdaptersRestDependency.AddAdaptersRest(builder.Services);
-AdapterGatewayDependency.AddAdapterGateway(builder.Services);
+AdaptersMessagingDependency.AddAdaptersMessaging(builder.Services, builder.Configuration);
+
+//AdapterGatewayDependency.AddAdapterGateway(builder.Services);
 AdaptersNotificationDependency.AddAdaptersNotification(builder.Services);
 
 var app = builder.Build();

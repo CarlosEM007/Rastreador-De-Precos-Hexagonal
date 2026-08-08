@@ -33,12 +33,7 @@ namespace Application.UseCases
         {
             var produto = await _repository.BuscarProduto(id);
 
-            decimal precoRetornado = await _gateway.ConsultarPrecoProduto(produto.EnderecoProduto ?? "");
-
-            if(produto.AtingiuPrecoAlvo(precoRetornado, out string Mensagem))
-            {
-                await _notification.NotificarPrecoAlvoAtingido(Mensagem);
-            }
+            await _gateway.RastrearPrecoProduto(produto.Id, produto.EnderecoProduto ?? "");
         }
     }
 }

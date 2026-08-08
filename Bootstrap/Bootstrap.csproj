@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Adapters.Messaging\Adapters.Messaging.csproj" />
     <ProjectReference Include="..\Adapters.Notification\Adapters.Notification.csproj" />
     <ProjectReference Include="..\Adapters.Persistence\Adapters.Persistence.csproj" />
     <ProjectReference Include="..\Adapters.Rest\Adapters.Rest.csproj" />

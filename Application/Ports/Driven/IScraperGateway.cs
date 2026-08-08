@@ -1,7 +1,7 @@
-﻿namespace Application.Ports.Driven
+namespace Application.Ports.Driven
 {
     public interface IScraperGateway
     {
-        Task<decimal> ConsultarPrecoProduto(string Url);
+        Task RastrearPrecoProduto(long idProduto, string url);
     }
 }
