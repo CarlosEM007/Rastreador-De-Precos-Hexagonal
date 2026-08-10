@@ -9,6 +9,6 @@ namespace Application.Ports.Driven
 {
     public interface IColetorDePreco
     {
-        ProdutoPrecoDto BuscarPrecoDoProduto(ProdutoContratoDto produto);
+        Task<ProdutoPrecoDto> BuscarPrecoDoProduto(ProdutoContratoDto produto);
     }
 }

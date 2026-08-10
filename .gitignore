@@ -367,3 +367,4 @@ Bootstrap/appsettings.Development.json
 
 .env
 .dockerignore
+/RastreadorDePreco.Scraper/appsettings.json

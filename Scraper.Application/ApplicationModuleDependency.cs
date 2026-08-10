@@ -1,6 +1,14 @@
-﻿namespace Application
+﻿using Application.Ports.Driving;
+using Application.UseCases;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Application
 {
-    public class ApplicationModuleDependency
+    public static class ApplicationModuleDependency
     {
+        public static void AddApplicationModule(this IServiceCollection services)
+        {
+            services.AddTransient<IColetarPreco, ColetarPrecoService>();
+        }
     }
 }
