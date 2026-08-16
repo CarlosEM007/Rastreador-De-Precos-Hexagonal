@@ -1,8 +1,9 @@
-﻿using Application.Ports.Driving;
+using Application.Ports.Driving;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Rastreador.Contracts;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
@@ -12,28 +13,45 @@ namespace Adapters.Messaging.Consumer
     {
         private const string Fila = "produtos-para-rastrear";
 
-        private readonly int _intervaloMensagenWorker;
         private readonly RabbitMqConnection _connection;
         private readonly IColetarPreco _coletar;
+        private readonly ILogger<ProdutoParaRastrearConsumer> _logger;
 
-        public ProdutoParaRastrearConsumer(int intervaloMensagenWorker, RabbitMqConnection connection, IColetarPreco coletar)
+        // O ack precisa sair pelo mesmo channel que entregou a mensagem.
+        private IChannel? _channel;
+
+        public ProdutoParaRastrearConsumer(
+            RabbitMqConnection connection,
+            IColetarPreco coletar,
+            ILogger<ProdutoParaRastrearConsumer> logger)
         {
-            _intervaloMensagenWorker = intervaloMensagenWorker;
             _connection = connection;
             _coletar = coletar;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var connection = await _connection.GetAsync();
-            await using var channel = await connection.CreateChannelAsync();
+            var connection = await _connection.GetAsync(stoppingToken);
+            await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
+            _channel = channel;
 
             await channel.QueueDeclareAsync(
                 queue: Fila,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null
+                arguments: null,
+                cancellationToken: stoppingToken
+            );
+
+            // Sem isso o broker empurra a fila inteira de uma vez: com autoAck: false,
+            // toda mensagem não confirmada fica pendurada na memória do consumer.
+            await channel.BasicQosAsync(
+                prefetchSize: 0,
+                prefetchCount: 1,
+                global: false,
+                cancellationToken: stoppingToken
             );
 
             var consumer = new AsyncEventingBasicConsumer(channel);
@@ -41,25 +59,55 @@ namespace Adapters.Messaging.Consumer
 
             await channel.BasicConsumeAsync(
                 queue: Fila,
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 consumerTag: "produto-para-rastrear-consumer",
                 noLocal: false,
                 exclusive: false,
-                arguments: null
+                arguments: null,
+                cancellationToken: stoppingToken
             );
 
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(_intervaloMensagenWorker, stoppingToken);
-            }
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
 
         private async Task Consumer_ReceivedAsync(object sender, BasicDeliverEventArgs @event)
         {
-            var produto = JsonSerializer.Deserialize<ProdutoContratoDto>(Encoding.UTF8.GetString(@event.Body.ToArray()));
+            var canal = _channel!;
 
-            await _coletar.ColetarPrecoProduto(produto);
+            ProdutoContratoDto? produto;
+            try
+            {
+                produto = JsonSerializer.Deserialize<ProdutoContratoDto>(Encoding.UTF8.GetString(@event.Body.ToArray()));
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "JSON inválido na fila {Fila}. Descartando.", Fila);
+
+                // Malformada: devolver pra fila só faria ela voltar pra sempre. Descarta.
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+                return;
+            }
+
+            // Um JSON que não bate com o contrato ainda deserializa: o record é posicional,
+            // então campos ausentes viram default e a Url chega null no caso de uso.
+            if (produto is null || string.IsNullOrWhiteSpace(produto.Url))
+            {
+                _logger.LogError("Mensagem fora do contrato na fila {Fila}. Descartando.", Fila);
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+                return;
+            }
+
+            try
+            {
+                await _coletar.ColetarPrecoProduto(produto);
+                await canal.BasicAckAsync(@event.DeliveryTag, multiple: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao coletar preço do produto {IdProduto}.", produto.IdProduto);
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: true);
+            }
         }
     }
 }

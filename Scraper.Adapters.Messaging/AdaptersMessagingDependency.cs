@@ -1,4 +1,5 @@
-﻿using Adapters.Messaging.Publisher;
+﻿using Adapters.Messaging.Consumer;
+using Adapters.Messaging.Publisher;
 using Application.Ports.Driven;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ namespace Adapters.Messaging
 
             services.AddSingleton<RabbitMqConnection>();
             services.AddSingleton<IPrecoPublisher, PrecoPublisher>();
+            services.AddHostedService<ProdutoParaRastrearConsumer>();
         }
     }
 }

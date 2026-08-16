@@ -2,7 +2,6 @@ using Adapters.Messaging;
 using Adapters.Notification;
 using Adapters.Persistence;
 using Adapters.Rest;
-using Adapters.Scraping;
 using Application;
 
 var builder = WebApplication.CreateBuilder(args);

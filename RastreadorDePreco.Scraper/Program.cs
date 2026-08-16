@@ -1,10 +1,14 @@
-﻿using Adapters.Messaging;
+﻿using Adapters.Coletor;
+using Adapters.Messaging;
 using Application;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-var services = new ServiceCollection();
-var config = new ConfigurationBuilder().Build();
+var hostbuilder = Host.CreateApplicationBuilder(args);
 
-ApplicationModuleDependency.AddApplicationModule(services);
-AdaptersMessagingDependency.AddAdaptersMessaging(services, config);
+ApplicationModuleDependency.AddApplicationModule(hostbuilder.Services);
+AdaptersMessagingDependency.AddAdaptersMessaging(hostbuilder.Services, hostbuilder.Configuration);
+ColetorModuleDependency.AddColetorModule(hostbuilder.Services);
+
+
+await hostbuilder.Build().RunAsync();
