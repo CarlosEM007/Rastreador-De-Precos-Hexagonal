@@ -84,13 +84,10 @@ namespace Adapters.Messaging.Consumer
             {
                 _logger.LogError(ex, "JSON inválido na fila {Fila}. Descartando.", Fila);
 
-                // Malformada: devolver pra fila só faria ela voltar pra sempre. Descarta.
                 await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
                 return;
             }
 
-            // Um JSON que não bate com o contrato ainda deserializa: o record é posicional,
-            // então campos ausentes viram default e a Url chega null no caso de uso.
             if (produto is null || string.IsNullOrWhiteSpace(produto.Url))
             {
                 _logger.LogError("Mensagem fora do contrato na fila {Fila}. Descartando.", Fila);

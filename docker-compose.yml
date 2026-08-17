@@ -55,7 +55,20 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__User=${RABBITMQDEFAULTUSER}
       - RabbitMq__Password=${RABBITMQDEFAULTPASS}
-   
+  scraper:
+    build:
+      context: .
+      dockerfile: RastreadorDePreco.Scraper/Dockerfile
+    container_name: rastreador-scraper
+    restart: on-failure
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__User=${RABBITMQDEFAULTUSER}
+      - RabbitMq__Password=${RABBITMQDEFAULTPASS}
 
 configs:
   rabbitmq-plugins:
