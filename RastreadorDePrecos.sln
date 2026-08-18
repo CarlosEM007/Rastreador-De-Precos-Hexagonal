@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapters.Messaging", "Scrap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapters.Coletor", "Adapters.Coletor\Adapters.Coletor.csproj", "{EE1291BD-F4A8-49BD-A775-2170D9A41086}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rastreador.Queues", "Rastreador.Queues\Rastreador.Queues.csproj", "{DCD2D337-EB55-4135-AA40-E0C061A9B2CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{EE1291BD-F4A8-49BD-A775-2170D9A41086}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE1291BD-F4A8-49BD-A775-2170D9A41086}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE1291BD-F4A8-49BD-A775-2170D9A41086}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCD2D337-EB55-4135-AA40-E0C061A9B2CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCD2D337-EB55-4135-AA40-E0C061A9B2CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCD2D337-EB55-4135-AA40-E0C061A9B2CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCD2D337-EB55-4135-AA40-E0C061A9B2CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +133,7 @@ Global
 		{9E99A972-67C2-466F-93EF-402C0882E874} = {16A4630F-8740-44B5-A29B-FDC2D0060215}
 		{544A7B41-74E4-4C6F-BB60-669EDB67B923} = {16A4630F-8740-44B5-A29B-FDC2D0060215}
 		{EE1291BD-F4A8-49BD-A775-2170D9A41086} = {16A4630F-8740-44B5-A29B-FDC2D0060215}
+		{DCD2D337-EB55-4135-AA40-E0C061A9B2CC} = {3F004123-2C9D-4699-9687-77B03A8E87B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5F6C19E-171D-462B-8DEF-EF05637CD1EA}

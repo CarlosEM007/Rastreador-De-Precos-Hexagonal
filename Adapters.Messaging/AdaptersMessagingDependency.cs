@@ -1,3 +1,4 @@
+using Adapters.Messaging.Consumer;
 using Adapters.Messaging.Publisher;
 using Application.Ports.Driven;
 using Microsoft.Extensions.Configuration;
@@ -20,8 +21,15 @@ namespace Adapters.Messaging
                 Port = int.TryParse(secao["Port"], out var porta) ? porta : AmqpTcpEndpoint.UseDefaultPort
             });
 
+            // Conexão
             services.AddSingleton<RabbitMqConnection>();
+
+            // Publisher
             services.AddSingleton<IScraperGateway, UrlPublisher>();
+            services.AddSingleton<INotificationGateway, PriceNotificationPublisher>();
+
+            // Consumer
+            services.AddHostedService<PrecoColetadoConsumer>();
         }
     }
 }

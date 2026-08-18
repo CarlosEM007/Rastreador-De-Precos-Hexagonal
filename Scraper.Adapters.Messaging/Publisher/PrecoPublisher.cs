@@ -1,6 +1,7 @@
 ﻿using Application.Ports.Driven;
 using RabbitMQ.Client;
 using Rastreador.Contracts;
+using Rastreador.Queues;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Adapters.Messaging.Publisher
 {
     public class PrecoPublisher : IPrecoPublisher
     {
-        private const string Fila = "precos-coletados";
+        private const string Fila = Queues.PrecosColetados;
 
         private readonly RabbitMqConnection _connection;
 

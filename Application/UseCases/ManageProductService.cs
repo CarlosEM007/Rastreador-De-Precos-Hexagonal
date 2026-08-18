@@ -9,13 +9,11 @@ namespace Application.UseCases
     {
         private readonly IProductRepository _repository;
         private readonly IScraperGateway _gateway;
-        private readonly INotificationGateway _notification;
 
-        public ManageProductService(IProductRepository repository, IScraperGateway gateway, INotificationGateway notification)
+        public ManageProductService(IProductRepository repository, IScraperGateway gateway)
         {
             _repository = repository;
             _gateway = gateway;
-            _notification = notification;
         }
 
         public async Task RegistrarProduto(ProductDto product)

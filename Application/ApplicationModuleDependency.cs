@@ -9,6 +9,7 @@ namespace Application
         public static void AddApplicationModule(this IServiceCollection services)
         {
             services.AddTransient<IManageProductsService, ManageProductService>();
+            services.AddTransient<INotificatorService, NotificatorService>();
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Rastreador.Contracts;
+using Rastreador.Queues;
 using System.Text;
 using System.Text.Json;
 
@@ -11,7 +12,7 @@ namespace Adapters.Messaging.Consumer
 {
     public class ProdutoParaRastrearConsumer : BackgroundService
     {
-        private const string Fila = "produtos-para-rastrear";
+        private const string Fila = Queues.ProdutosParaRastrear;
 
         private readonly RabbitMqConnection _connection;
         private readonly IColetarPreco _coletar;

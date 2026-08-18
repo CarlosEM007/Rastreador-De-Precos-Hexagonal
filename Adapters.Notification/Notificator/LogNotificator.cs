@@ -3,6 +3,9 @@ using System.IO;
 
 namespace Adapters.Notification.Notificator
 {
+    // Classe legada. Que não será mais usada, mas ficará aqui para ver a
+    // evolução do projeto
+
     public class LogNotificator : INotificationGateway
     {
         public async Task NotificarPrecoAlvoAtingido(string Message)

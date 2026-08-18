@@ -19,8 +19,9 @@ ApplicationModuleDependency.AddApplicationModule(builder.Services);
 AdaptersPersistenceDependency.AddAdaptersPersistence(builder.Services, builder.Configuration);
 AdaptersMessagingDependency.AddAdaptersMessaging(builder.Services, builder.Configuration);
 
+// Classes legadas, substituidas pelo messaging
 //AdapterGatewayDependency.AddAdapterGateway(builder.Services);
-AdaptersNotificationDependency.AddAdaptersNotification(builder.Services);
+//AdaptersNotificationDependency.AddAdaptersNotification(builder.Services);
 
 var app = builder.Build();
 

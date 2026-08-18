@@ -1,6 +1,7 @@
 using Application.Ports.Driven;
 using RabbitMQ.Client;
 using Rastreador.Contracts;
+using Rastreador.Queues;
 using System.Text;
 using System.Text.Json;
 
@@ -8,7 +9,7 @@ namespace Adapters.Messaging.Publisher
 {
     public class UrlPublisher : IScraperGateway
     {
-        private const string Fila = "produtos-para-rastrear";
+        private const string Fila = Queues.ProdutosParaRastrear;
 
         private readonly RabbitMqConnection _connection;
 
