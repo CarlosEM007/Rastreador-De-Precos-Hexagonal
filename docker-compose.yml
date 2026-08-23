@@ -69,6 +69,21 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__User=${RABBITMQDEFAULTUSER}
       - RabbitMq__Password=${RABBITMQDEFAULTPASS}
+  notificador:
+    build:
+      context: .
+      dockerfile: RastreadorDePreco.Notificador/Dockerfile
+    container_name: rastreador-notificador
+    restart: on-failure
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__User=${RABBITMQDEFAULTUSER}
+      - RabbitMq__Password=${RABBITMQDEFAULTPASS}
+      - Notificacao__Destinatario=${NOTIFICACAODESTINATARIO:-voce@exemplo.com}
 
 configs:
   rabbitmq-plugins:
