@@ -13,7 +13,10 @@ ErrorHandlingDependency.AddExceptionHandling(builder.Services);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Inje��o de Depend�ncia
+// É por aqui que o compose (e o Kong) descobrem que a API já está de pé.
+builder.Services.AddHealthChecks();
+
+// Injeção de dependência
 AdaptersRestDependency.AddAdaptersRest(builder.Services);
 ApplicationModuleDependency.AddApplicationModule(builder.Services);
 AdaptersPersistenceDependency.AddAdaptersPersistence(builder.Services, builder.Configuration);
@@ -39,5 +42,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

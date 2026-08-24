@@ -2,10 +2,15 @@
 
 # Esta fase é usada durante a execução no VS no modo rápido (Padrão para a configuração de Depuração)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# A imagem do ASP.NET é slim e não traz cliente HTTP. O curl entra só para o
+# healthcheck do compose conseguir bater no /health de dentro do container.
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 5250
 
 
 # Esta fase é usada para compilar o projeto de serviço

@@ -37,13 +37,47 @@ services:
       timeout: 10s
       retries: 12
       start_period: 30s
+  # Ponto único de entrada. Modo DB-less: as rotas vêm de kong/kong.yml, não de
+  # um banco. Só o Kong publica porta HTTP no host — a API ficou para dentro.
+  kong:
+    image: kong:3.9
+    container_name: rastreador-gateway
+    restart: on-failure
+    depends_on:
+      rastreador:
+        condition: service_healthy
+    ports:
+      # 8000 = proxy (o que o mundo usa). 8001 = Admin API, presa no localhost
+      # porque quem alcança a Admin API reconfigura o gateway inteiro.
+      - "8000:8000"
+      - "127.0.0.1:8001:8001"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/kong.yml
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+    volumes:
+      - ./kong:/kong:ro
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
   rastreador:
     build:
       context: .
       dockerfile: Bootstrap/Dockerfile
     container_name: rastreador-app
-    ports:
-    - 5250:8080
+    restart: on-failure
+    # Sem `ports`: a API só é alcançável pela rede interna do compose, via Kong.
+    # Para depurar direto nela de novo, devolva `ports: ["5250:8080"]` aqui.
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -55,6 +89,12 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__User=${RABBITMQDEFAULTUSER}
       - RabbitMq__Password=${RABBITMQDEFAULTPASS}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
   scraper:
     build:
       context: .

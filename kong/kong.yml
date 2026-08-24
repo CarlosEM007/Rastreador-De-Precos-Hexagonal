@@ -1,0 +1,50 @@
+# Configuração declarativa do Kong (modo DB-less).
+#
+# Em produção o Kong costuma guardar rotas num Postgres próprio e ser configurado
+# pela Admin API. Aqui ele lê tudo deste arquivo no boot: a config vive junto do
+# código, versionada no git, e subir o gateway do zero não depende de banco nenhum.
+#
+# Depois de editar: docker compose restart kong
+
+_format_version: "3.0"
+
+services:
+  # `url` usa o nome do serviço do compose. É a mesma rede docker que a API usa
+  # para achar o postgres — o Kong não precisa de IP nem de porta publicada.
+  - name: rastreador-api
+    url: http://rastreador:8080
+    retries: 3
+    connect_timeout: 5000
+    read_timeout: 60000
+    write_timeout: 60000
+
+    routes:
+      # strip_path: false mantém o prefixo ao repassar. Uma chamada em
+      # localhost:8000/api/ManageProduct chega na API como /api/ManageProduct.
+      - name: produtos
+        paths:
+          - /api
+        strip_path: false
+
+      # Swagger pelo gateway, para não precisar expor a porta da API no host.
+      - name: swagger
+        paths:
+          - /swagger
+        strip_path: false
+
+      # Health da API vista de fora. Não confundir com `/status`, que é do
+      # próprio Kong e responde mesmo se a API estiver morta.
+      - name: health
+        paths:
+          - /health
+        strip_path: false
+
+plugins:
+  # Carimba um X-Request-Id em toda requisição que entra e devolve o mesmo id na
+  # resposta. Com três serviços conversando por fila, é o que permite amarrar
+  # "esta chamada HTTP" aos logs que ela gerou lá na frente.
+  - name: correlation-id
+    config:
+      header_name: X-Request-Id
+      generator: uuid
+      echo_downstream: true
