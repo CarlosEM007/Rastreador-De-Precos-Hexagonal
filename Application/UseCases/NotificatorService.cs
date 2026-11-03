@@ -1,4 +1,4 @@
-﻿using Application.Ports.Driven;
+using Application.Ports.Driven;
 using Application.Ports.Driving;
 using Domain.Entities;
 using Rastreador.Contracts;
@@ -16,11 +16,18 @@ namespace Application.UseCases
             _gateway = gateway;
         }
 
-        public async  Task NotificarPrecoEncontrado(ProdutoPrecoDto produto)
+        public async Task NotificarPrecoEncontrado(ProdutoPrecoDto produto)
         {
             Produto p = await _repository.BuscarProduto(produto.IdProduto);
 
-            if(p.AtingiuPrecoAlvo(produto.Preco, out string message))
+            bool atingiu = p.AtingiuPrecoAlvo(produto.Preco, out string message);
+
+            // O preço coletado é guardado sempre, tenha atingido o alvo ou não:
+            // é ele que mantém o cadastro vivo entre um rastreamento e outro.
+            p.RegistrarPrecoColetado(produto.Preco);
+            await _repository.AtualizarProduto(p);
+
+            if (atingiu)
             {
                 await _gateway.NotificarPrecoAlvoAtingido(message);
             }

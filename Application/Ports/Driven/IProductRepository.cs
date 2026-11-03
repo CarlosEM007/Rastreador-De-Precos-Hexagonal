@@ -1,9 +1,4 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Entities;
 
 namespace Application.Ports.Driven
 {
@@ -11,5 +6,8 @@ namespace Application.Ports.Driven
     {
         Task SalvarProduto(Produto produto);
         Task<Produto> BuscarProduto(long id);
+        Task<IReadOnlyList<Produto>> ListarProdutos();
+        Task AtualizarProduto(Produto produto);
+        Task RemoverProduto(long id);
     }
 }

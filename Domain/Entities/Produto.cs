@@ -32,6 +32,41 @@ namespace Domain.Entities
             PrecoAlvo = precoAlvo;
         }
 
+        /// <summary>
+        /// Atualiza os dados que o usuário controla. O preço atual fica de fora de propósito:
+        /// quem dita esse valor é o scraper, não quem edita o cadastro.
+        /// </summary>
+        public void AtualizarCadastro(string nome, string enderecoProduto, decimal precoAlvo)
+        {
+            if (string.IsNullOrEmpty(enderecoProduto))
+            {
+                throw new InvalidProductURLException("Não pode ser vázia.");
+            }
+
+            if (precoAlvo <= 0)
+            {
+                throw new InvalidProductValueException("Preço alvo precisa ser maior que zero!");
+            }
+
+            Nome = nome;
+            EnderecoProduto = enderecoProduto;
+            PrecoAlvo = precoAlvo;
+        }
+
+        /// <summary>
+        /// Guarda o preço que o scraper encontrou. Aqui não vale a regra do construtor
+        /// (atual > alvo): um preço abaixo do alvo é justamente o caso que queremos registrar.
+        /// </summary>
+        public void RegistrarPrecoColetado(decimal precoRecebidoDoScraper)
+        {
+            if (precoRecebidoDoScraper <= 0)
+            {
+                throw new InvalidProductValueException("Preço coletado precisa ser maior que zero!");
+            }
+
+            PrecoAtual = precoRecebidoDoScraper;
+        }
+
         public bool AtingiuPrecoAlvo(decimal precoRecebidoDoScraper, out string Mensagem)
         {
             Mensagem = "";

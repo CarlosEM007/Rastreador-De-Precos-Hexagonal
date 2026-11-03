@@ -1,4 +1,4 @@
-﻿using Adapters.Persistence.Data;
+using Adapters.Persistence.Data;
 using Application.Ports.Driven;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -27,9 +27,36 @@ namespace Adapters.Persistence.Repository
             return produto;
         }
 
+        public async Task<IReadOnlyList<Produto>> ListarProdutos()
+        {
+            // AsNoTracking: a listagem é só leitura, não precisa do change tracker.
+            return await _context.Produtos
+                                 .AsNoTracking()
+                                 .OrderBy(p => p.Id)
+                                 .ToListAsync();
+        }
+
         public async Task SalvarProduto(Produto produto)
         {
             await _context.Produtos.AddAsync(produto);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AtualizarProduto(Produto produto)
+        {
+            // O produto já vem rastreado quando foi lido por este mesmo contexto.
+            // O Update cobre o caso em que não veio (ex.: veio de outro escopo).
+            _context.Produtos.Update(produto);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoverProduto(long id)
+        {
+            var produto = await BuscarProduto(id);
+
+            _context.Produtos.Remove(produto);
 
             await _context.SaveChangesAsync();
         }
