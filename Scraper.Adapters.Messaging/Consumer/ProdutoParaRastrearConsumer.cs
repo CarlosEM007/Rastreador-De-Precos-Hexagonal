@@ -101,9 +101,17 @@ namespace Adapters.Messaging.Consumer
                 await _coletar.ColetarPrecoProduto(produto);
                 await canal.BasicAckAsync(@event.DeliveryTag, multiple: false);
             }
+            catch (Exception ex) when (@event.Redelivered)
+            {
+                // Segunda falha seguida: a página pode estar fora do ar ou ter mudado de layout.
+                // Devolver de novo só criaria um loop infinito na fila.
+                _logger.LogError(ex, "Produto {IdProduto} falhou na reentrega. Descartando a mensagem.", produto.IdProduto);
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao coletar preço do produto {IdProduto}.", produto.IdProduto);
+                // Primeira falha: pode ser instabilidade de rede. Vale uma segunda tentativa.
+                _logger.LogError(ex, "Erro ao coletar preço do produto {IdProduto}. Devolvendo para a fila.", produto.IdProduto);
                 await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: true);
             }
         }

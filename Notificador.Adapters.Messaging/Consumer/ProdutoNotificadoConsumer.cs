@@ -97,9 +97,16 @@ namespace Adapters.Messaging.Consumer
                 await _notificar.Notificar(mensagem, @event.CancellationToken);
                 await canal.BasicAckAsync(@event.DeliveryTag, multiple: false);
             }
+            catch (Exception ex) when (@event.Redelivered)
+            {
+                // Já falhou uma vez. Insistir viraria loop infinito na fila.
+                _logger.LogError(ex, "Notificação falhou na reentrega. Descartando a mensagem da fila {Fila}.", Fila);
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao entregar a notificação vinda da fila {Fila}.", Fila);
+                // Primeira falha: trata como transitória e devolve para uma segunda tentativa.
+                _logger.LogError(ex, "Erro ao entregar a notificação vinda da fila {Fila}. Devolvendo para a fila.", Fila);
                 await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: true);
             }
         }

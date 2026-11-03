@@ -18,6 +18,7 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Contracts\Rastreador.Contracts.csproj" />
     <ProjectReference Include="..\Rastreador.Queues\Rastreador.Queues.csproj" />
+    <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
 </Project>

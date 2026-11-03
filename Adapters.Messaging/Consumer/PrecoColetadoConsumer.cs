@@ -1,4 +1,5 @@
 ﻿using Application.Ports.Driving;
+using Domain.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -108,9 +109,25 @@ namespace Adapters.Messaging.Consumer
                 await notificator.NotificarPrecoEncontrado(produto);
                 await canal.BasicAckAsync(@event.DeliveryTag, multiple: false);
             }
+            catch (ProductNotFoundException ex)
+            {
+                // Erro permanente: o produto não existe mais (foi removido entre o rastreamento
+                // e a coleta). Tentar de novo vai falhar igual, então a mensagem morre aqui.
+                _logger.LogWarning(ex, "Produto {IdProduto} não existe mais. Descartando a mensagem.", produto.IdProduto);
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+            }
+            catch (Exception ex) when (@event.Redelivered)
+            {
+                // Já é a segunda vez que esta mensagem falha. Insistir só alimenta o loop:
+                // volta pra fila, falha, volta de novo — queimando CPU para sempre.
+                _logger.LogError(ex, "Produto {IdProduto} falhou na reentrega. Descartando a mensagem.", produto.IdProduto);
+                await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao validar preço do produto com id {IdProduto}.", produto.IdProduto);
+                // Primeira falha: trata como transitória (banco fora do ar, por exemplo)
+                // e devolve para a fila para uma segunda tentativa.
+                _logger.LogError(ex, "Erro ao validar preço do produto com id {IdProduto}. Devolvendo para a fila.", produto.IdProduto);
                 await canal.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: true);
             }
         }
