@@ -1,4 +1,4 @@
-﻿using Application.Ports.Driving;
+using Application.Ports.Driving;
 using Application.UseCases;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +10,7 @@ namespace Application
         {
             services.AddTransient<IManageProductsService, ManageProductService>();
             services.AddTransient<INotificatorService, NotificatorService>();
+            services.AddTransient<IRastreamentoService, RastreamentoService>();
         }
     }
 }

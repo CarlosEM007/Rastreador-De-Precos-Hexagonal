@@ -23,6 +23,7 @@
     <ProjectReference Include="..\Adapters.Persistence\Adapters.Persistence.csproj" />
     <ProjectReference Include="..\Adapters.Rest\Adapters.Rest.csproj" />
     <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\Adapters.Agendador\Adapters.Agendador.csproj" />
   </ItemGroup>
 
 </Project>

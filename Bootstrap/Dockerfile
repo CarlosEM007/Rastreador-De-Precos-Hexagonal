@@ -25,7 +25,9 @@ COPY ["Adapters.Persistence/Adapters.Persistence.csproj", "Adapters.Persistence/
 COPY ["Adapters.Rest/Adapters.Rest.csproj", "Adapters.Rest/"]
 COPY ["Adapters.Scraper/Adapters.Scraping.csproj", "Adapters.Scraper/"]
 COPY ["Adapters.Messaging/Adapters.Messaging.csproj", "Adapters.Messaging/"]
+COPY ["Adapters.Agendador/Adapters.Agendador.csproj", "Adapters.Agendador/"]
 COPY ["Contracts/Rastreador.Contracts.csproj", "Contracts/"]
+COPY ["Rastreador.Queues/Rastreador.Queues.csproj", "Rastreador.Queues/"]
 RUN dotnet restore "./Bootstrap/Bootstrap.csproj"
 COPY . .
 WORKDIR "/src/Bootstrap"
