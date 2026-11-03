@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Contracts\Rastreador.Contracts.csproj" />
     <ProjectReference Include="..\Rastreador.Queues\Rastreador.Queues.csproj" />
     <ProjectReference Include="..\Scraper.Application\Application.csproj" />
+    <ProjectReference Include="..\Rastreador.Health\Rastreador.Health.csproj" />
   </ItemGroup>
 
 </Project>

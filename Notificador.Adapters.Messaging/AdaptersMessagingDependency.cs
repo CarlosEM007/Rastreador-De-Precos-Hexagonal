@@ -2,6 +2,7 @@ using Adapters.Messaging.Consumer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
+using Rastreador.Health;
 
 namespace Adapters.Messaging
 {
@@ -22,6 +23,9 @@ namespace Adapters.Messaging
             services.AddSingleton<RabbitMqConnection>();
 
             services.AddHostedService<ProdutoNotificadoConsumer>();
+
+            // Worker não fala HTTP: o healthcheck do compose lê um arquivo de heartbeat.
+            services.AddHeartbeat<RabbitMqHealthProbe>(configuration);
         }
     }
 }

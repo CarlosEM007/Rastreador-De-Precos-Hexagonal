@@ -13,6 +13,7 @@ COPY ["Notificador.Application/Application.csproj", "Notificador.Application/"]
 COPY ["Notificador.Adapters.Messaging/Adapters.Messaging.csproj", "Notificador.Adapters.Messaging/"]
 COPY ["Notificador.Adapters.Email/Adapters.Email.csproj", "Notificador.Adapters.Email/"]
 COPY ["Rastreador.Queues/Rastreador.Queues.csproj", "Rastreador.Queues/"]
+COPY ["Rastreador.Health/Rastreador.Health.csproj", "Rastreador.Health/"]
 RUN dotnet restore "./RastreadorDePreco.Notificador/Host.csproj"
 COPY . .
 WORKDIR "/src/RastreadorDePreco.Notificador"

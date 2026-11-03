@@ -13,6 +13,8 @@ COPY ["Scraper.Application/Application.csproj", "Scraper.Application/"]
 COPY ["Scraper.Adapters.Messaging/Adapters.Messaging.csproj", "Scraper.Adapters.Messaging/"]
 COPY ["Adapters.Coletor/Adapters.Coletor.csproj", "Adapters.Coletor/"]
 COPY ["Contracts/Rastreador.Contracts.csproj", "Contracts/"]
+COPY ["Rastreador.Queues/Rastreador.Queues.csproj", "Rastreador.Queues/"]
+COPY ["Rastreador.Health/Rastreador.Health.csproj", "Rastreador.Health/"]
 RUN dotnet restore "./RastreadorDePreco.Scraper/Host.csproj"
 COPY . .
 WORKDIR "/src/RastreadorDePreco.Scraper"

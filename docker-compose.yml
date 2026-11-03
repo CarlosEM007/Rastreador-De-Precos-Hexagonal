@@ -109,6 +109,15 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__User=${RABBITMQDEFAULTUSER}
       - RabbitMq__Password=${RABBITMQDEFAULTPASS}
+    healthcheck:
+      # Worker não fala HTTP, então não há endpoint para chamar. O serviço toca
+      # /tmp/healthy a cada 15s enquanto a conexão com o RabbitMQ estiver aberta;
+      # aqui a gente só confere se esse carimbo é recente. Arquivo velho = travado.
+      test: ["CMD-SHELL", "find /tmp/healthy -mmin -1 | grep -q ."]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 40s
   notificador:
     build:
       context: .
@@ -124,6 +133,12 @@ services:
       - RabbitMq__User=${RABBITMQDEFAULTUSER}
       - RabbitMq__Password=${RABBITMQDEFAULTPASS}
       - Notificacao__Destinatario=${NOTIFICACAODESTINATARIO:-voce@exemplo.com}
+    healthcheck:
+      test: ["CMD-SHELL", "find /tmp/healthy -mmin -1 | grep -q ."]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 40s
 
 configs:
   rabbitmq-plugins:

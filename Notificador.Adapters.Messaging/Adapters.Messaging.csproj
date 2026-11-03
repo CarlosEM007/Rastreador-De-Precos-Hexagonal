@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Notificador.Application\Application.csproj" />
     <ProjectReference Include="..\Rastreador.Queues\Rastreador.Queues.csproj" />
+    <ProjectReference Include="..\Rastreador.Health\Rastreador.Health.csproj" />
   </ItemGroup>
 
 </Project>
