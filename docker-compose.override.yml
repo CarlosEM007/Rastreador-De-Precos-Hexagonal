@@ -1,0 +1,34 @@
+# Configuração de DESENVOLVIMENTO.
+#
+# O compose carrega este arquivo automaticamente por cima do docker-compose.yml, então
+# `docker compose up` já sobe em modo dev. Para subir como produção, ignore o override:
+#
+#   docker compose -f docker-compose.yml up --build
+#
+# A diferença entre os dois é só isto aqui — o docker-compose.yml não tem nada de "dev".
+
+services:
+  rastreador:
+    # Porta direta na API, para depurar sem passar pelo gateway.
+    # Em produção ela não existe: o único caminho é o Kong.
+    ports:
+      - "5250:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
+      # Rodadas curtas para não esperar 5 minutos vendo se funciona.
+      - Rastreamento__IntervaloEmMinutos=1
+      - Rastreamento__AtrasoInicialEmSegundos=15
+
+  scraper:
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
+      # Preço aleatório em vez de ir na rede: o fluxo inteiro roda sem depender
+      # de nenhuma loja real estar no ar e com o layout esperado.
+      - Coletor__Modo=Fake
+
+  notificador:
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
