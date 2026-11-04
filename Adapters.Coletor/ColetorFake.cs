@@ -1,9 +1,13 @@
-﻿using Application.Ports.Driven;
+using Application.Ports.Driven;
 using Rastreador.Contracts;
 
 namespace Adapters.Coletor;
 
-public class ScraperGateway : IColetorDePreco
+/// <summary>
+/// Devolve um preço aleatório, sem tocar na rede. É o coletor usado em desenvolvimento:
+/// deixa o fluxo inteiro (fila → comparação → notificação) rodar sem depender de nenhum site.
+/// </summary>
+public class ColetorFake : IColetorDePreco
 {
     public Task<ProdutoPrecoDto> BuscarPrecoDoProduto(ProdutoContratoDto produto)
     {
