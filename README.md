@@ -24,7 +24,7 @@ Com tudo de pé:
 | Painel do RabbitMQ | http://localhost:15672 |
 | Admin API do Kong | http://localhost:8001 |
 
-Primeiro cadastra o produto:
+Cadastra um produto:
 
 ```bash
 curl -X POST http://localhost:8000/api/ManageProduct \
@@ -32,19 +32,40 @@ curl -X POST http://localhost:8000/api/ManageProduct \
   -d '{"nome":"Teclado","url":"https://exemplo.com/teclado","precoAtual":300,"precoAlvo":200}'
 ```
 
-E depois consulta ele, que é o que dispara o rastreamento:
-
-```bash
-curl http://localhost:8000/api/ManageProduct/1
-```
-
-Agora é só acompanhar os logs e ver o alerta chegar do outro lado:
+E pronto — daí em diante o sistema se vira sozinho. O agendador reenfileira todos os produtos de tempos em tempos, e o alerta aparece quando o preço cai:
 
 ```bash
 docker compose logs -f notificador
 ```
 
-> O Scraper hoje devolve um preço aleatório em vez de raspar a página de verdade. Ele é um adaptador atrás de uma porta (`IColetorDePreco`), então trocar o mock por scraping real é mexer numa classe só — e essa é exatamente a ideia que eu queria treinar aqui.
+Se não quiser esperar o próximo ciclo, dá pra forçar o rastreamento de um produto:
+
+```bash
+curl -X POST http://localhost:8000/api/ManageProduct/1/rastrear
+```
+
+### Endpoints
+
+| Método | Rota | O que faz |
+| --- | --- | --- |
+| `POST` | `/api/ManageProduct` | Cadastra um produto |
+| `GET` | `/api/ManageProduct` | Lista todos |
+| `GET` | `/api/ManageProduct/{id}` | Devolve um produto |
+| `PUT` | `/api/ManageProduct/{id}` | Atualiza nome, URL e preço-alvo |
+| `DELETE` | `/api/ManageProduct/{id}` | Remove |
+| `POST` | `/api/ManageProduct/{id}/rastrear` | Força o rastreamento agora (responde `202`: o preço chega depois, pela fila) |
+
+### Desenvolvimento e produção
+
+O `docker-compose.override.yml` é carregado automaticamente e é o que define o modo de desenvolvimento: porta direta na API pra depurar sem o gateway, logs em `Debug`, ciclo de rastreamento curto (1 minuto) e o coletor de preço no modo **Fake**, que sorteia um valor em vez de ir na rede — assim o fluxo inteiro roda sem depender de nenhuma loja real estar no ar.
+
+Pra subir no modo produção, é só ignorar o override:
+
+```bash
+docker compose -f docker-compose.yml up --build
+```
+
+Aí entram o coletor HTTP de verdade, o ciclo de 5 minutos e o gateway como único caminho de entrada.
 
 ---
 
@@ -79,12 +100,16 @@ Os três são projetos .NET separados, cada um com a própria hexagonal, e **nen
 <br>
 <img width="480" height="350" alt="WhatsApp Image 2026-07-31 at 17 14 46" src="https://github.com/user-attachments/assets/cc39ee70-cb80-4814-892c-093c4fd4d2ac" />
 
-1. O **Principal** publica o produto na fila (o cadastro salva no banco; é a consulta que dispara o rastreamento).
+1. O **Principal** publica o produto na fila.
 2. O **Scraper** consome, e o produto começa a ser rastreado.
 3. O Scraper extrai o preço e devolve pro RabbitMQ.
-4. O **Principal** consome esse preço e valida se atingiu o objetivo.
+4. O **Principal** consome esse preço, guarda no banco e valida se atingiu o objetivo.
    - **4.5.** Se atingiu, publica o alerta de volta na fila.
 5. O serviço de **Notificações** consome o alerta e avisa o usuário.
+
+Quem dá a partida no passo 1 é um **agendador** dentro do Principal: um `BackgroundService` que, de tempos em tempos, reenfileira todos os produtos cadastrados. É o que faz o rastreador rastrear sozinho, sem ninguém chamar endpoint nenhum — o `POST /{id}/rastrear` existe só pra forçar uma rodada na hora.
+
+Uma coisa que aparece quando os serviços passam a conversar por fila: **mensagem que falha não pode voltar pra fila pra sempre**. Se o produto foi removido entre o rastreamento e a coleta, insistir não resolve — o erro é permanente e a mensagem é descartada. Já uma falha de rede merece uma segunda tentativa, mas só uma: os consumers olham a flag `Redelivered` e, na segunda falha seguida, param de insistir. Sem isso, uma única mensagem ruim fica girando em loop e queimando CPU.
 
 As filas que ligam tudo isso ficam num projeto compartilhado (`Rastreador.Queues`), pra nome de fila não virar string solta espalhada pelo código:
 
@@ -102,7 +127,9 @@ A API deixou de publicar porta no host: ela só existe dentro da rede do compose
 
 Entrou também um plugin de `correlation-id`, que carimba um `X-Request-Id` em toda requisição. Com três serviços conversando por fila, é isso que permite amarrar uma chamada HTTP aos logs que ela gera lá na frente.
 
-E cada serviço passou a declarar quando está realmente pronto, via healthcheck no compose — o Kong só sobe depois que a API responde no `/health`, que por sua vez só sobe depois que Postgres e RabbitMQ estão saudáveis.
+E cada serviço passou a declarar quando está realmente pronto, via healthcheck no compose. O Kong só sobe depois que a API responde no `/health`, que por sua vez só sobe depois que Postgres e RabbitMQ estão saudáveis.
+
+Os dois workers deram mais trabalho: eles não falam HTTP, então não existe endpoint pro compose chamar. A saída foi inverter a lógica — cada worker toca um arquivo a cada 15 segundos enquanto a conexão com o RabbitMQ estiver aberta, e o healthcheck só olha se esse carimbo é recente. Arquivo velho quer dizer serviço travado, o que é mais honesto do que "o processo existe".
 
 ---
 
@@ -114,8 +141,9 @@ Cada serviço repete a mesma divisão hexagonal: um host, um núcleo (`Applicati
 Principal (API)
 ├── Bootstrap                      Host da Web API
 ├── Adapters.Rest                  Controllers + middleware de erro
-├── Adapters.Persistence           EF Core + Postgres
+├── Adapters.Persistence           EF Core + Postgres (migrations no start)
 ├── Adapters.Messaging             Publishers e consumer do RabbitMQ
+├── Adapters.Agendador             Dispara o rastreamento em loop
 ├── Application                    Casos de uso e portas
 └── Domain                         Entidades e regras
 
@@ -123,7 +151,7 @@ Scraper
 ├── RastreadorDePreco.Scraper      Host (Worker)
 ├── Scraper.Application
 ├── Scraper.Adapters.Messaging
-└── Adapters.Coletor               Busca o preço (hoje, um mock)
+└── Adapters.Coletor               ColetorHttp (real) e ColetorFake (dev)
 
 Notificações
 ├── RastreadorDePreco.Notificador  Host (Worker)
@@ -133,11 +161,20 @@ Notificações
 
 Compartilhado
 ├── Contracts                      DTOs que trafegam nas filas
-└── Rastreador.Queues              Nomes das filas
+├── Rastreador.Queues              Nomes das filas
+└── Rastreador.Health              Heartbeat dos workers
 
 Tests
-└── Principal.Tests
+├── Principal.Tests
+├── Scraper.Tests
+└── Notificador.Tests
 ```
+
+### Coletando o preço
+
+O `ColetorHttp` baixa a página e procura o preço no dado estruturado que as lojas publicam pro Google — JSON-LD e meta tags do Open Graph / schema.org — em vez de caçar classe de CSS, que muda a cada redesign. Ele entende tanto `1.234,56` quanto `1,234.56`.
+
+Os dois coletores vivem atrás da mesma porta (`IColetorDePreco`), e qual deles sobe é decidido por uma variável de ambiente. Trocar o jeito de obter o preço não toca em mais nada do sistema — que é o ponto inteiro da hexagonal.
 
 ## Stack
 
@@ -146,14 +183,13 @@ Tests
 - RabbitMQ
 - Docker e Docker Compose
 - Kong (API Gateway)
-- xUnit
+- xUnit + Moq
 
 ## Próximos passos
 
-- Healthcheck nos workers — eles não falam HTTP, então precisam de outra estratégia pra dizer que estão vivos.
-- `docker-compose.override.yml` separando configuração de desenvolvimento e produção.
-- Persistir o preço coletado: hoje ele é usado só pra comparar com o alvo e descartado.
-- Trocar o mock do Scraper por scraping de verdade.
+- **Dead-letter queue** pras mensagens descartadas: hoje elas só viram log, e o certo é mandar pra uma fila de análise.
+- **Autenticação** no gateway — o Kong tem plugins de JWT e rate limiting que resolveriam isso sem tocar na API.
+- **Histórico de preços**, pra conseguir mostrar a variação ao longo do tempo em vez de só o último valor.
 
 ---
 
